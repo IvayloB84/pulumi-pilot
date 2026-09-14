@@ -15,7 +15,7 @@ s3_bucket_policy_document = s3_bucket.arn.apply(
                     "Effect": "Allow",
                     "Principal": {"Service": "lambda.amazonaws.com"},
                     "Action": ["s3:PutObject", "s3:PutObjectAcl"],
-                    "Resources": f"{arn}/*",
+                    "Resource": f"{arn}/*",
                 }
             ],
         }
