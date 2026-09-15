@@ -29,6 +29,8 @@ jobs:
       #     role-to-assume: arn:aws:iam::123456789012:role/GitHubPulumiPreviewRole
       #     aws-region: us-east-1
 
+      # (Optional Cloud Authentication Step goes here)
+
       # 2. Run the Pulumi Action in PREVIEW mode only
       - name: Run Pulumi Preview
         uses: pulumi/actions@v7
