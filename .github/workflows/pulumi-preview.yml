@@ -1,9 +1,8 @@
 name: Pulumi Infrastructure Safety Check
 
 on:
-  # Triggers the safety check whenever a PR is opened or updated
-  pull_request:
-    branches:
+  push:
+    branches-ignore:
       - main
 
 jobs:
@@ -11,25 +10,20 @@ jobs:
     name: Pulumi Preview
     runs-on: ubuntu-latest
     
-    # Permissions required to comment on the PR and authenticate via OIDC
     permissions:
       id-token: write
       contents: read
-      pull-requests: write
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
 
-      # 1. Authenticate with your Cloud Provider here (e.g., AWS, Azure, GCP)
-      # Example for AWS using secure OpenID Connect (OIDC):
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     role-to-assume: arn:aws:iam::123456789012:role/GitHubPulumiPreviewRole
-      #     aws-region: us-east-1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::655236339481:role/GitHubPulumiOidcRole
+          aws-region: eu-central-1
 
-      # 2. Run the Pulumi Action in PREVIEW mode only
       - name: Run Pulumi Preview
         uses: pulumi/actions@v7
         with:
@@ -37,3 +31,4 @@ jobs:
           stack-name: dev
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
