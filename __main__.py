@@ -32,5 +32,3 @@ s3_bucket_policy = aws.s3.BucketPolicy(
 # Export the names and ARNs of the created resources
 pulumi.export("bucket_name", s3_bucket.id)
 pulumi.export("bucket_arn", s3_bucket.arn)
-
-# End of the file
