@@ -1,6 +1,5 @@
 name: Pulumi Infrastructure Safety Check
 
-# 1. Broaden the event catching parameters
 on:
   push:
     branches-ignore:
@@ -9,10 +8,9 @@ on:
     branches:
       - main
 
-# 2. CRITICAL: Lift permissions to the root level of the script
 permissions:
-  id-token: write  # Grants authority to generate the OIDC token
-  contents: read   # Grants authority to checkout code strings
+  id-token: write
+  contents: read
 
 jobs:
   preview:
@@ -23,21 +21,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v7
 
-      # 3. Clean OIDC Authentication with a safe explicit handshake audience
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: arn:aws:iam::655236339481:role/GitHubPulumiOidcRole
+          role-to-assume: arn:aws:iam::655236339481:role/GitHubPulumiNewRunRole
           aws-region: eu-central-1
           role-session-name: GitHubActionsPulumiPreview
           audience: sts.amazonaws.com
 
-      # 4. State management compilation
       - name: Run Pulumi Preview
         uses: pulumi/actions@v7
         with:
           command: preview
           stack-name: dev
         env:
-          # This is the only token Pulumi needs explicitly mapped from your GitHub Secrets
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
