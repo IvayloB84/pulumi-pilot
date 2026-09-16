@@ -1,39 +1,45 @@
 name: Pulumi Infrastructure Safety Check
 
+# 1. Broaden the event catching parameters
 on:
-  # Triggers the safety check whenever a PR is opened or updated
+  push:
+    branches-ignore:
+      - main
   pull_request:
     branches:
       - main
+
+# 2. CRITICAL: Lift permissions to the root level of the script
+permissions:
+  id-token: write  # Grants authority to generate the OIDC token
+  contents: read   # Grants authority to checkout code strings
 
 jobs:
   preview:
     name: Pulumi Preview
     runs-on: ubuntu-latest
-    
-    # Permissions required to comment on the PR and authenticate via OIDC
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
 
-      # 1. Authenticate with your Cloud Provider here (e.g., AWS, Azure, GCP)
-      # Example for AWS using secure OpenID Connect (OIDC):
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     role-to-assume: arn:aws:iam::123456789012:role/GitHubPulumiPreviewRole
-      #     aws-region: us-east-1
+      # 3. Clean OIDC Authentication with a safe explicit handshake audience
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::655236339481:role/GitHubPulumiOidcRole
+          aws-region: eu-central-1
+          role-session-name: GitHubActionsPulumiPreview
+          audience: sts.amazonaws.com
 
-      # 2. Run the Pulumi Action in PREVIEW mode only
+      # 4. State management compilation
       - name: Run Pulumi Preview
-        uses: pulumi/actions@v7
+        uses: pulumi/actions@v6
         with:
           command: preview
           stack-name: dev
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
