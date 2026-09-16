@@ -3,7 +3,7 @@ import pulumi_aws as aws
 import json
 
 # Create an AWS resource (S3 Bucket)
-s3_bucket = aws.s3.Bucket('pulumi-pilot-bucket')
+s3_bucket = aws.s3.Bucket("pulumi-pilot-bucket", tags={"Environment": "TestingPR"})
 
 # IAM Policy Document that allows the Lambda service to write to the S3 bucket
 s3_bucket_policy_document = s3_bucket.arn.apply(
