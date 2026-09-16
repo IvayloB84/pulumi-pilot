@@ -8,10 +8,6 @@ on:
     branches:
       - main
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   preview:
     name: Pulumi Preview
@@ -21,13 +17,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v7
 
+      # Log in cleanly using static environment secrets to request a secure STS session
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: arn:aws:iam::655236339481:role/GitHubPulumiNewRunRole
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::655236339481:role/GitHubPulumiAssumeRole
           aws-region: eu-central-1
+          role-duration-seconds: 1200
           role-session-name: GitHubActionsPulumiPreview
-          audience: sts.amazonaws.com
 
       - name: Run Pulumi Preview
         uses: pulumi/actions@v7
