@@ -11,19 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     
     permissions:
-      id-token: write
-      contents: read
+      id-token: write  # Critical for OIDC handshake
+      contents: read   # Critical to check out the repo code
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
 
+      # 1. Generate the OIDC dynamic security tokens
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::655236339481:role/GitHubPulumiOidcRole
           aws-region: eu-central-1
+          role-session-name: GitHubActionsPulumiPreview
 
+      # 2. Force Pulumi to consume the environment tokens
       - name: Run Pulumi Preview
         uses: pulumi/actions@v7
         with:
@@ -31,4 +34,7 @@ jobs:
           stack-name: dev
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-
+          # These 3 lines bind your AWS handshake explicitly into the Pulumi execution context
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
